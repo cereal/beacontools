@@ -72,6 +72,6 @@ class BtAddrFilter(DeviceFilter):
     def __init__(self, bt_addr):
         """Initialize filter."""
         super(BtAddrFilter, self).__init__()
-        if bt_addr is None or len(bt_addr) != 17:
+        if not bt_addr or len(bt_addr) != 17:
             raise ValueError("Invalid bluetooth given, need to be in format aa:bb:cc:dd:ee:ff")
         self.properties['bt_addr'] = bt_addr
