@@ -21,6 +21,7 @@ class DeviceFilter(object):
 
         return found_one
 
+
 class IBeaconFilter(DeviceFilter):
     """Filter for iBeacon."""
 
@@ -36,18 +37,20 @@ class IBeaconFilter(DeviceFilter):
         if minor is not None:
             self.properties['minor'] = minor
 
+
 class EddystoneFilter(DeviceFilter):
     """Filter for Eddystone beacons."""
 
     def __init__(self, namespace=None, instance=None):
         """Initialize filter."""
         super(EddystoneFilter, self).__init__()
-        if not namespace and not instance:
+        if namespace is None and instance is None:
             raise ValueError("EddystoneFilter needs at least one argument set")
-        if namespace:
+        if namespace is not None:
             self.properties['namespace'] = namespace
-        if instance:
+        if instance is not None:
             self.properties['instance'] = instance
+
 
 class EstimoteFilter(DeviceFilter):
     """Filter for Estimote beacons."""
@@ -55,12 +58,13 @@ class EstimoteFilter(DeviceFilter):
     def __init__(self, identifier=None, protocol_version=None):
         """Initialize filter."""
         super(EstimoteFilter, self).__init__()
-        if not identifier and not protocol_version:
+        if identifier is None and protocol_version is None:
             raise ValueError("EstimoteFilter needs at least one argument set")
-        if identifier:
+        if identifier is not None:
             self.properties['identifier'] = identifier
-        if protocol_version:
+        if protocol_version is not None:
             self.properties['protocol_version'] = protocol_version
+
 
 class BtAddrFilter(DeviceFilter):
     """Filter by bluetooth address."""
@@ -68,6 +72,6 @@ class BtAddrFilter(DeviceFilter):
     def __init__(self, bt_addr):
         """Initialize filter."""
         super(BtAddrFilter, self).__init__()
-        if not bt_addr or len(bt_addr) != 17:
+        if bt_addr is None or len(bt_addr) != 17:
             raise ValueError("Invalid bluetooth given, need to be in format aa:bb:cc:dd:ee:ff")
         self.properties['bt_addr'] = bt_addr
