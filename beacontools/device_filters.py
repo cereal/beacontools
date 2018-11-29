@@ -27,13 +27,13 @@ class IBeaconFilter(DeviceFilter):
     def __init__(self, uuid=None, major=None, minor=None):
         """Initialize filter."""
         super(IBeaconFilter, self).__init__()
-        if not uuid and not major and not minor:
+        if uuid is None and major is None and minor is None:
             raise ValueError("IBeaconFilter needs at least one argument set")
-        if uuid:
+        if uuid is not None:
             self.properties['uuid'] = uuid
-        if major:
+        if major is not None:
             self.properties['major'] = major
-        if minor:
+        if minor is not None:
             self.properties['minor'] = minor
 
 class EddystoneFilter(DeviceFilter):
