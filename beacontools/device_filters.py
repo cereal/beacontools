@@ -83,6 +83,9 @@ class BtAddrFilter(DeviceFilter):
             return True
         try:
             mac = mac.replace("-", "").replace(".", "").replace(":", "")
+        except AttributeError:
+            return True
+        try:
             if len(unhexlify(mac)) != 6:
                 return True
         except (TypeError, Error):
