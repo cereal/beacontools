@@ -177,7 +177,7 @@ class TestScanner(unittest.TestCase):
         self.assertRaises(ValueError, BtAddrFilter, "az")
         self.assertRaises(ValueError, BtAddrFilter, None)
         self.assertRaises(ValueError, BtAddrFilter, "aa-bb-cc-dd-ee-fg")
-        self.assertEqual(BtAddrFilter.is_invalid_mac("aa:bb:cc:dd:ee:"), True)
+        self.assertEqual(BtAddrFilter.parses_invalid_mac("aa:bb:cc:dd:ee:"), True)
 
     def test_process_packet_btaddr(self):
         """Test processing of a packet and callback execution with bt addr filter."""
