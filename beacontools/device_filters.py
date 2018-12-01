@@ -22,7 +22,7 @@ class DeviceFilter(object):
                 found_one = True
 
         return found_one
-    
+
     def __repr__(self):
         return "{}({})".format(
             self.__class__.__name__,
@@ -88,10 +88,11 @@ class BtAddrFilter(DeviceFilter):
         except Exception:
             return True
         return False
-    
+
     def __init__(self, bt_addr):
         """Initialize filter."""
         super(BtAddrFilter, self).__init__()
         if BtAddrFilter.parses_invalid_mac(bt_addr):
-            raise ValueError("Invalid bluetooth MAC address given, supported formats are aa:bb:cc:dd:ee:ff, aa-bb-cc-dd-ee-ff and aabb.ccdd.eeff")
+            raise ValueError("Invalid bluetooth MAC address given, supported formats are aa:bb:cc:dd:ee:ff,"
+                             " aa-bb-cc-dd-ee-ff and aabb.ccdd.eeff")
         self.properties['bt_addr'] = bt_addr
