@@ -85,5 +85,6 @@ class BtAddrFilter(DeviceFilter):
         except AttributeError:
             raise ValueError("bt_addr({}) wasn't a string".format(bt_addr))
         if not is_valid_mac(bt_addr):
-            raise ValueError("Invalid bluetooth MAC address given, format should match aa:bb:cc:dd:ee:ff")
+            raise ValueError("Invalid bluetooth MAC address given,"
+                             " format should match aa:bb:cc:dd:ee:ff")
         self.properties['bt_addr'] = bt_addr
