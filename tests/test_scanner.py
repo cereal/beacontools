@@ -171,12 +171,14 @@ class TestScanner(unittest.TestCase):
         callback.assert_not_called()
 
     def test_repr_filter(self):
-        self.assertEqual(BtAddrFilter("aa-bb-cc-dd-ee-ff").__repr__(), "BtAddrFilter(bt_addr=aa-bb-cc-dd-ee-ff)")
+        self.assertEqual(BtAddrFilter("aa:bb:cc:dd:ee:ff").__repr__(), "BtAddrFilter(bt_addr=aa:bb:cc:dd:ee:ff)")
 
     def test_wrong_btaddr(self):
         self.assertRaises(ValueError, BtAddrFilter, "az")
         self.assertRaises(ValueError, BtAddrFilter, None)
         self.assertRaises(ValueError, BtAddrFilter, "aa-bb-cc-dd-ee-fg")
+        self.assertRaises(ValueError, BtAddrFilter, "aa-bb-cc-dd-ee-ff")
+        self.assertRaises(ValueError, BtAddrFilter, "aabb.ccdd.eeff")
         self.assertRaises(ValueError, BtAddrFilter, 42)
         self.assertRaises(ValueError, BtAddrFilter, "aa:bb:cc:dd:ee:")
 
