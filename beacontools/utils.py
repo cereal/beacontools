@@ -1,13 +1,14 @@
 """Utilities for byte conversion."""
 from binascii import hexlify
-from re import compile as compile_regex, I
+from re import compile as compile_regex
 import array
 import struct
 
 from .const import ScannerMode
 
-# compiled regex, ignores case
-RE_MAC_ADDR = compile_regex('(?:[0-9a-f]{2}:){5}(?:[0-9a-f]{2})', I)
+# compiled regex to match lowercase MAC-addresses coming from
+# bt_addr_to_string
+RE_MAC_ADDR = compile_regex('(?:[0-9a-f]{2}:){5}(?:[0-9a-f]{2})')
 
 
 def is_valid_mac(mac):
