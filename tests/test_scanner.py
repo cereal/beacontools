@@ -179,7 +179,6 @@ class TestScanner(unittest.TestCase):
         self.assertRaises(ValueError, BtAddrFilter, "aa-bb-cc-dd-ee-fg")
         self.assertRaises(ValueError, BtAddrFilter, "aa-bb-cc-dd-ee-ff")
         self.assertRaises(ValueError, BtAddrFilter, "aabb.ccdd.eeff")
-        self.assertRaises(ValueError, BtAddrFilter, 42)
         self.assertRaises(ValueError, BtAddrFilter, "aa:bb:cc:dd:ee:")
 
     def test_process_packet_btaddr(self):
