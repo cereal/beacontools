@@ -1,6 +1,7 @@
 """Filters passed to the BeaconScanner to filter results."""
 
-from binascii import unhexlify, Error
+from .utils import is_valid_mac
+
 
 class DeviceFilter(object):
     """Base class for all device filters. Should not be used by itself."""
@@ -76,27 +77,9 @@ class EstimoteFilter(DeviceFilter):
 class BtAddrFilter(DeviceFilter):
     """Filter by bluetooth address."""
 
-    @staticmethod
-    def parses_invalid_mac(mac):
-        "tries to efficiently parse a MAC Address, returns True on success otherwise False"
-        if mac is None:
-            return True
-        try:
-            mac = mac.replace("-", "").replace(".", "").replace(":", "")
-        except AttributeError:
-            return True
-        try:
-            if len(unhexlify(mac)) != 6:
-                return True
-        except (TypeError, Error):
-            return True
-        return False
-
     def __init__(self, bt_addr):
         """Initialize filter."""
         super(BtAddrFilter, self).__init__()
-        if BtAddrFilter.parses_invalid_mac(bt_addr):
-            raise ValueError("Invalid bluetooth MAC address given, supported "
-                             "formats are aa:bb:cc:dd:ee:ff,"
-                             " aa-bb-cc-dd-ee-ff and aabb.ccdd.eeff")
+        if not is_valid_mac(bt_addr):
+            raise ValueError("Invalid bluetooth MAC address given, format should match aa:bb:cc:dd:ee:ff")
         self.properties['bt_addr'] = bt_addr
