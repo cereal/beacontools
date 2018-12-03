@@ -12,6 +12,7 @@ RE_MAC_ADDR = compile_regex('(?:[0-9a-f]{2}:){5}(?:[0-9a-f]{2})')
 
 
 def is_valid_mac(mac):
+    """"Returns True if the given argument matches RE_MAC_ADDR, otherwise False"""
     return RE_MAC_ADDR.match(mac) is not None
 
 
