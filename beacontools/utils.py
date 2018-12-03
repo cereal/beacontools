@@ -1,10 +1,18 @@
 """Utilities for byte conversion."""
 from binascii import hexlify
+from re import compile as compile_regex, I
 import array
 import struct
 
 from .const import ScannerMode
 from .device_filters import IBeaconFilter, EddystoneFilter, BtAddrFilter, EstimoteFilter
+
+# compiled regex, ignores case
+RE_MAC_ADDR = compile_regex('(?:[0-9a-f]{2}:){5}(?:[0-9a-f]{2})', I)
+
+
+def is_valid_mac(mac):
+    return RE_MAC_ADDR.match(mac) is not None
 
 def data_to_hexstring(data):
     """Convert an array of binary data to the hex representation as a string."""
