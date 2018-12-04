@@ -107,12 +107,12 @@ class Monitor(threading.Thread):
     def set_scan_parameters(self):
         """"sets the scan parameters (socket, type, interval, window, own_type, filter)"""
         from struct import pack
-        SCAN_TYPE_RANDOM = 0x01
-        OWN_TYPE = SCAN_TYPE_RANDOM
-        INTERVAL, WINDOW = 0x10, 0x10
-        FILTER_ALL = 0x00
+        scan_type_random = 0x01
+        own_type = scan_type_random
+        interval, window = 0x10, 0x10
+        filter_all = 0x00
         scan_parameter_pkg = pack(
-          "<BBBBBBB", SCAN_TYPE_RANDOM, 0x0, INTERVAL, 0x0, WINDOW, OWN_TYPE, FILTER)
+            "<BBBBBBB", scan_type_random, 0x0, interval, 0x0, window, own_type, filter_all)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                 scan_parameter_pkg)
 
