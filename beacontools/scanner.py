@@ -105,11 +105,13 @@ class Monitor(threading.Thread):
                 self.process_packet(pkt)
         self.socket.close()
 
-    def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_ms=10, window_ms=10,
+    def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_and_window_ms=(10, 10,),
                             mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the scan parameters (socket, type, interval, window, own_type, filter)"""
         from struct import pack
-        scan_parameter_pkg = pack("<BBBBBBB",
+        interval_ms, window_ms = interval_and_window_ms
+        scan_parameter_pkg = pack(
+            "<BBBBBBB",
             scan_type, 0x0, interval_ms * MS_FRACTION_MULTIPLIER, 0x0, window_ms * MS_FRACTION_MULTIPLIER,
             mac_type, filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
