@@ -10,9 +10,10 @@ from .packet_types import EddystoneUIDFrame, EddystoneURLFrame, \
                           EddystoneEIDFrame
 from .device_filters import BtAddrFilter, DeviceFilter
 from .utils import is_packet_type, is_one_of, to_int, bin_to_int, get_mode
-from .const import ScannerMode, LE_META_EVENT, OGF_LE_CTL, \
-                   OCF_LE_SET_SCAN_ENABLE, EVT_LE_ADVERTISING_REPORT, \
-                   OCF_LE_SET_SCAN_PARAMETERS
+from .const import ScannerMode, ScanType, ScanFilter, BluetoothAddressType, \
+                   LE_META_EVENT, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, \
+                   OCF_LE_SET_SCAN_PARAMETERS, EVT_LE_ADVERTISING_REPORT, \
+                   MS_FRACTION_MULTIPLIER
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -104,15 +105,13 @@ class Monitor(threading.Thread):
                 self.process_packet(pkt)
         self.socket.close()
 
-    def set_scan_parameters(self):
+    def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_ms=10, window_ms=10,
+                            mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the scan parameters (socket, type, interval, window, own_type, filter)"""
         from struct import pack
-        scan_type_random = 0x01
-        own_type = scan_type_random
-        interval, window = 0x10, 0x10
-        filter_all = 0x00
-        scan_parameter_pkg = pack(
-            "<BBBBBBB", scan_type_random, 0x0, interval, 0x0, window, own_type, filter_all)
+        scan_parameter_pkg = pack("<BBBBBBB",
+            scan_type, 0x0, interval_ms * MS_FRACTION_MULTIPLIER, 0x0, window_ms * MS_FRACTION_MULTIPLIER,
+            mac_type, filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                 scan_parameter_pkg)
 
