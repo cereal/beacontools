@@ -112,8 +112,8 @@ class Monitor(threading.Thread):
         interval_ms, window_ms = interval_and_window_ms
         scan_parameter_pkg = pack(
             "<BBBBBBB",
-            scan_type, 0x0, interval_ms * MS_FRACTION_MULTIPLIER, 0x0, window_ms * MS_FRACTION_MULTIPLIER,
-            mac_type, filter_type)
+            scan_type, 0x0, interval_ms * MS_FRACTION_MULTIPLIER, 
+            0x0, window_ms * MS_FRACTION_MULTIPLIER, mac_type, filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                 scan_parameter_pkg)
 
