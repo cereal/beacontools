@@ -107,7 +107,17 @@ class Monitor(threading.Thread):
 
     def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_and_window_ms=(10, 10,),
                             mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
-        """"sets the scan parameters (socket, type, interval, window, own_type, filter)"""
+        """"sets the le scan parameters
+            socket   - socket file descriptor of bluetooth module
+            type     - ScanType.(PASSIVE|ACTIVE)
+            interval - ms between scans
+            window   - ms scan duration
+            own_type - Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
+                       PUBLIC = use device Bluetooth MAC address
+                       RANDOM = generate and use a random MAC address
+            filter   - ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
+                       return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
+                       because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
         from struct import pack
         interval_ms, window_ms = interval_and_window_ms
         scan_parameter_pkg = pack(
