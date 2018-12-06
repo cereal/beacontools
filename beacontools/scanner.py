@@ -13,7 +13,7 @@ from .utils import is_packet_type, is_one_of, to_int, bin_to_int, get_mode
 from .const import (ScannerMode, ScanType, ScanFilter, BluetoothAddressType,
                     LE_META_EVENT, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE,
                     OCF_LE_SET_SCAN_PARAMETERS, EVT_LE_ADVERTISING_REPORT,
-                    MS_FRACTION_MULTIPLIER,)
+                    MS_FRACTION_DIVIDER,)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -108,7 +108,6 @@ class Monitor(threading.Thread):
     def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_and_window_ms=(10, 10,),
                             mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the le scan parameters
-            socket   - socket file descriptor of bluetooth module
             type     - ScanType.(PASSIVE|ACTIVE)
             interval - ms between scans
             window   - ms scan duration
@@ -121,9 +120,10 @@ class Monitor(threading.Thread):
         from struct import pack
         interval_ms, window_ms = interval_and_window_ms
         scan_parameter_pkg = pack(
-            "<BBBBBBB",
-            scan_type, 0x0, interval_ms * MS_FRACTION_MULTIPLIER,
-            0x0, window_ms * MS_FRACTION_MULTIPLIER, mac_type, filter_type)
+            ">BHHBB",
+            scan_type,
+            interval_ms / MS_FRACTION_DIVIDER,
+            window_ms / MS_FRACTION_DIVIDER, mac_type, filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                 scan_parameter_pkg)
 
