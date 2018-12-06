@@ -111,19 +111,25 @@ class Monitor(threading.Thread):
                             mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the le scan parameters
             type     - ScanType.(PASSIVE|ACTIVE)
-            interval - ms between scans
-            window   - ms scan duration
+            interval - ms between scans (valid range 2.5ms - 10240ms)
+            window   - ms scan duration (valid range 2.5ms - 10240ms)
             own_type - Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
                        PUBLIC = use device Bluetooth MAC address
                        RANDOM = generate and use a random MAC address
             filter   - ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
                        return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
                        because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
+        interval_fractions = interval_ms / MS_FRACTION_DIVIDER
+        if interval_fractions < 0x0004 or interval_fractions > 0x4000:
+            raise ValueError("Invalid interval given {}, must be in range of 2.5ms to 10240ms!")
+        window_fractions = window_ms / MS_FRACTION_DIVIDER
+        if window_fractions < 0x0004 or window_fractions > 0x4000:
+            raise ValueError("Invalid window given {}, must be in range of 2.5ms to 10240ms!")
         scan_parameter_pkg = struct.pack(
             ">BHHBB",
             scan_type,
-            interval_ms / MS_FRACTION_DIVIDER,
-            window_ms / MS_FRACTION_DIVIDER,
+            interval_fractions,
+            window_fractions,
             mac_type,
             filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
