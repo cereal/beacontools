@@ -1,5 +1,6 @@
 """Classes responsible for Beacon scanning."""
 import threading
+import struct
 import logging
 from importlib import import_module
 
@@ -59,6 +60,7 @@ class BeaconScanner(object):
         """Stop beacon scanning."""
         self._mon.terminate()
 
+
 class Monitor(threading.Thread):
     """Continously scan for BLE advertisements."""
 
@@ -105,7 +107,7 @@ class Monitor(threading.Thread):
                 self.process_packet(pkt)
         self.socket.close()
 
-    def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_and_window_ms=(10, 10,),
+    def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_ms=10, window_ms=10,
                             mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the le scan parameters
             type     - ScanType.(PASSIVE|ACTIVE)
@@ -117,22 +119,22 @@ class Monitor(threading.Thread):
             filter   - ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
                        return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
                        because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
-        from struct import pack
-        interval_ms, window_ms = interval_and_window_ms
-        scan_parameter_pkg = pack(
+        scan_parameter_pkg = struct.pack(
             ">BHHBB",
             scan_type,
             interval_ms / MS_FRACTION_DIVIDER,
-            window_ms / MS_FRACTION_DIVIDER, mac_type, filter_type)
+            window_ms / MS_FRACTION_DIVIDER,
+            mac_type,
+            filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                 scan_parameter_pkg)
 
-    def toggle_scan(self, enable):
-        """Enable and disable BLE scanning."""
-        if enable:
-            command = "\x01\x00"
-        else:
-            command = "\x00\x00"
+    def toggle_scan(self, enable, filter_duplicates=False):
+        """ Enable and disable BLE scanning.
+            enable            - boolean value to enable/disable scanner
+            filter_duplicates - boolean value to enable/disable filter, that
+                                omits duplicated packets"""
+        command = struct.pack(">BB", enable, filter_duplicates)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
 
     def process_packet(self, pkt):
