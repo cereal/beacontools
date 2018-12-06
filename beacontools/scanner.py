@@ -5,15 +5,15 @@ from importlib import import_module
 
 from .parser import parse_packet
 from .utils import bt_addr_to_string
-from .packet_types import EddystoneUIDFrame, EddystoneURLFrame, \
-                          EddystoneEncryptedTLMFrame, EddystoneTLMFrame, \
-                          EddystoneEIDFrame
+from .packet_types import (EddystoneUIDFrame, EddystoneURLFrame,
+                           EddystoneEncryptedTLMFrame, EddystoneTLMFrame,
+                           EddystoneEIDFrame,)
 from .device_filters import BtAddrFilter, DeviceFilter
 from .utils import is_packet_type, is_one_of, to_int, bin_to_int, get_mode
-from .const import ScannerMode, ScanType, ScanFilter, BluetoothAddressType, \
-                   LE_META_EVENT, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, \
-                   OCF_LE_SET_SCAN_PARAMETERS, EVT_LE_ADVERTISING_REPORT, \
-                   MS_FRACTION_MULTIPLIER
+from .const import (ScannerMode, ScanType, ScanFilter, BluetoothAddressType,
+                    LE_META_EVENT, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE,
+                    OCF_LE_SET_SCAN_PARAMETERS, EVT_LE_ADVERTISING_REPORT,
+                    MS_FRACTION_MULTIPLIER,)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,11 +21,11 @@ _LOGGER.setLevel(logging.DEBUG)
 
 # pylint: disable=no-member
 
+
 class BeaconScanner(object):
     """Scan for Beacon advertisements."""
 
     def __init__(self, callback, bt_device_id=0, device_filter=None, packet_filter=None):
-
         """Initialize scanner."""
         # check if device filters are valid
         if device_filter is not None:
