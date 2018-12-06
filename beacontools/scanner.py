@@ -121,10 +121,16 @@ class Monitor(threading.Thread):
                        because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
         interval_fractions = interval_ms / MS_FRACTION_DIVIDER
         if interval_fractions < 0x0004 or interval_fractions > 0x4000:
-            raise ValueError("Invalid interval given {}, must be in range of 2.5ms to 10240ms!")
+            raise ValueError(
+                "Invalid interval given {}, must be in range of 2.5ms to 10240ms!".format(
+                    interval_fractions))
+
         window_fractions = window_ms / MS_FRACTION_DIVIDER
         if window_fractions < 0x0004 or window_fractions > 0x4000:
-            raise ValueError("Invalid window given {}, must be in range of 2.5ms to 10240ms!")
+            raise ValueError(
+                "Invalid window given {}, must be in range of 2.5ms to 10240ms!".format(
+                    window_fractions))
+
         scan_parameter_pkg = struct.pack(
             ">BHHBB",
             scan_type,
