@@ -112,6 +112,7 @@ class Monitor(threading.Thread):
         """"sets the le scan parameters
             type     - ScanType.(PASSIVE|ACTIVE)
             interval - ms between scans (valid range 2.5ms - 10240ms)
+                  !note: when interval and window are equal, the scan runs continuos
             window   - ms scan duration (valid range 2.5ms - 10240ms)
             own_type - Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
                        PUBLIC = use device Bluetooth MAC address
