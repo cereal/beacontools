@@ -1,9 +1,11 @@
 """Packet classes for Eddystone beacons."""
 from binascii import hexlify
+from .packet import BasePacket
 from ..const import EDDYSTONE_URL_SCHEMES, EDDYSTONE_TLD_ENCODINGS
 from ..utils import data_to_hexstring, data_to_binstring
 
-class EddystoneUIDFrame(object):
+
+class EddystoneUIDFrame(BasePacket):
     """Eddystone UID frame."""
 
     def __init__(self, data):
@@ -36,7 +38,7 @@ class EddystoneUIDFrame(object):
                % (self.tx_power, self.namespace, self.instance)
 
 
-class EddystoneURLFrame(object):
+class EddystoneURLFrame(BasePacket):
     """Eddystone URL frame."""
 
     def __init__(self, data):
@@ -65,7 +67,7 @@ class EddystoneURLFrame(object):
                % (self.tx_power, self.url)
 
 
-class EddystoneEncryptedTLMFrame(object):
+class EddystoneEncryptedTLMFrame(BasePacket):
     """Eddystone encrypted TLM frame."""
 
     def __init__(self, data):
@@ -93,7 +95,7 @@ class EddystoneEncryptedTLMFrame(object):
                % (hexlify(self.encrypted_data), self.salt, self.mic)
 
 
-class EddystoneTLMFrame(object):
+class EddystoneTLMFrame(BasePacket):
     """Eddystone TLM frame."""
 
     def __init__(self, data):
@@ -129,11 +131,12 @@ class EddystoneTLMFrame(object):
         return self._seconds_since_boot
 
     def __str__(self):
-        return "EddystoneTLMFrame<voltage: %d mV, temperature: %d Celsius, advertising count: %d,"\
-               " seconds since boot: %d>" % (self.voltage, self.temperature, \
-                self.advertising_count, self.seconds_since_boot)
+        return "EddystoneTLMFrame<voltage: %d mV, temperature: %d Celsius, advertising count: %d," + \
+               " seconds since boot: %d>" % (
+                   self.voltage, self.temperature, self.advertising_count, self.seconds_since_boot)
 
-class EddystoneEIDFrame(object):
+
+class EddystoneEIDFrame(BasePacket):
     """Eddystone EID frame."""
 
     def __init__(self, data):
