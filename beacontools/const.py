@@ -30,8 +30,8 @@ class BluetoothAddressType(IntEnum):
     RANDOM = 0x01  # with a random MAC-address
 
 
-# used for window and interval (i.e. 0x10 * 0.625 = 10ms)
-MS_FRACTION_MULTIPLIER = 0.625
+# used for window and interval (i.e. 0x10 * 0.625 = 10ms, 10ms / 0.625 = 0x10)
+MS_FRACTION_DIVIDER = 0.625
 
 LE_META_EVENT = 0x3e
 OGF_LE_CTL = 0x08
