@@ -20,7 +20,19 @@ from .const import (ScannerMode, ScanType, ScanFilter, BluetoothAddressType,
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
+
 # pylint: disable=no-member,too-many-arguments
+class Scanner(threading.Thread):
+
+    def __init__(self, callback, bt_device_id=0, device_filter=None, packet_filter=None):
+        if callable(callback):
+            self._cb = callback
+        else:
+            raise ValueError("callback is not a callable object!")
+        super(Scanner, self).__init__()
+        self._bt_device_id = bt_device_id
+        self._device_filter = None
+        self._packet_filter = packet_filter
 
 
 class BeaconScanner(object):
