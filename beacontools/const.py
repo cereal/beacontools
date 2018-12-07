@@ -1,6 +1,7 @@
 """Constants."""
 from enum import IntEnum
 
+
 # for scanner
 class ScannerMode(IntEnum):
     """Used to determine which packets should be parsed by the scanner."""
