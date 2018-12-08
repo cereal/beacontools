@@ -132,6 +132,8 @@ class Scanner(threading.Thread):
         if not self._resouceless.is_set():
             command = struct.pack(">BB", enable, filter_duplicates)
             self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
+            return
+        raise RuntimeError("Couldn't send hci command, seems we are resourceless")
 
 
 class BeaconScanner(object):
