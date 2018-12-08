@@ -131,9 +131,11 @@ class EddystoneTLMFrame(BasePacket):
         return self._seconds_since_boot
 
     def __str__(self):
-        return "EddystoneTLMFrame<voltage: %d mV, temperature: %d Celsius, advertising count: %d," + \
-               " seconds since boot: %d>" % (
-                   self.voltage, self.temperature, self.advertising_count, self.seconds_since_boot)
+        return "".join(
+            ("EddystoneTLMFrame<",
+             "voltage: {:d} mV, temperature: {:d} Celsius, ",
+             "advertising count: {:d}, seconds since boot: {:d}>")
+        ).format(self.voltage, self.temperature, self.advertising_count, self.seconds_since_boot)
 
 
 class EddystoneEIDFrame(BasePacket):
