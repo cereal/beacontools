@@ -219,16 +219,10 @@ class Scanner(threading.Thread):
 
     def properties_from_mapping(self, bt_addr):
         """Retrieve properties (namespace, instance) for the specified bt address."""
-        for addr, properties in self.eddystone_mappings:
+        for addr, properties in self._eddystone_mappings:
             if addr == bt_addr:
                 return properties
         return None
-
-    def terminate(self):
-        """Signal runner to stop and join thread."""
-        self.toggle_scan(False)
-        self.keep_going = False
-        self.join()
 
 
 class BeaconScanner(object):
