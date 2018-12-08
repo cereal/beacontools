@@ -6,6 +6,7 @@ from importlib import import_module
 
 from .parser import parse_packet
 from .utils import bt_addr_to_string
+from .packet_types import BasePacket
 from .packet_types import (EddystoneUIDFrame, EddystoneURLFrame,
                            EddystoneEncryptedTLMFrame, EddystoneTLMFrame,
                            EddystoneEIDFrame,)
@@ -24,6 +25,17 @@ _LOGGER.setLevel(logging.DEBUG)
 # pylint: disable=no-member,too-many-arguments
 class Scanner(threading.Thread):
 
+    @staticmethod
+    def validate_filters(fltrs, cls):
+        if fltrs is None:
+            return
+        elif not isinstance(fltrs, list):
+            fltrs = [fltrs]
+
+        for fltr in fltrs:
+            if not isinstance(fltr, cls):
+                raise ValueError("{} is not an instance of {}".format(fltr, cls))
+
     def __init__(self, callback, bt_device_id=0, device_filter=None, packet_filter=None):
         if callable(callback):
             self._cb = callback
@@ -31,8 +43,8 @@ class Scanner(threading.Thread):
             raise ValueError("callback is not a callable object!")
         super(Scanner, self).__init__()
         self._bt_device_id = bt_device_id
-        self._device_filter = None
-        self._packet_filter = packet_filter
+        self._device_filter = Scanner.validate_filters(device_filter, DeviceFilter)
+        self._packet_filter = Scanner.validate_filters(packet_filter, BasePacket)
 
 
 class BeaconScanner(object):
