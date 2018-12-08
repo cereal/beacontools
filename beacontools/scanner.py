@@ -3,6 +3,12 @@ import threading
 import struct
 import logging
 import contextlib
+import itertools
+try:
+    zip = itertools.izip
+    map = itertools.imap
+except AttributeError:  # python3
+    pass
 from importlib import import_module
 
 from .parser import parse_packet
@@ -134,6 +140,92 @@ class Scanner(threading.Thread):
             self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
             return
         raise RuntimeError("Couldn't send hci command, seems we are resourceless")
+
+    def process_packet(self, pkt):
+        """Parse the packet and call callback if one of the filters matches."""
+
+        # check if this could be a valid packet before parsing
+        # this reduces the CPU load significantly
+        if not (
+                ((self._mode & ScannerMode.MODE_IBEACON) and (pkt[19:23] == b"\x4c\x00\x02\x15")) or
+                ((self._mode & ScannerMode.MODE_EDDYSTONE) and (pkt[19:21] == b"\xaa\xfe")) or
+                ((self._mode & ScannerMode.MODE_ESTIMOTE) and (pkt[19:21] == b"\x9a\xfe"))):
+            return
+
+        bt_addr = bt_addr_to_string(pkt[7:13])
+        rssi = bin_to_int(pkt[-1])
+        # strip bluetooth address and parse packet
+        packet = parse_packet(pkt[14:-1])
+
+        # return if packet was not an beacon advertisement
+        if not packet:
+            return
+
+        # we need to remeber which eddystone beacon has which bt address
+        # because the TLM and URL frames do not contain the namespace and instance
+        self.save_bt_addr(packet, bt_addr)
+        # properties holds the identifying information for a beacon
+        # e.g. instance and namespace for eddystone; uuid, major, minor for iBeacon
+        properties = self.get_properties(packet, bt_addr)
+
+        if self._device_filter is None and self._packet_filter is None:
+            # no filters selected
+            self._cb(bt_addr, rssi, packet, properties)
+
+        elif self._device_filter is None:
+            # filter by packet type
+            # if is_one_of(packet, self.packet_filter):
+            if any(map(lambda x: isinstance(*x),
+                       zip(itertools.cycle(packet),
+                       self._packet_filter))):
+                self.callback(bt_addr, rssi, packet, properties)
+        else:
+            # filter by device and packet type
+            if self.packet_filter and not is_one_of(packet, self.packet_filter):
+                # return if packet filter does not match
+                return
+
+            # iterate over filters and call .matches() on each
+            for filtr in self.device_filter:
+                if isinstance(filtr, BtAddrFilter):
+                    if filtr.matches({'bt_addr':bt_addr}):
+                        self.callback(bt_addr, rssi, packet, properties)
+                        return
+
+                elif filtr.matches(properties):
+                    self.callback(bt_addr, rssi, packet, properties)
+                    return
+
+    def save_bt_addr(self, packet, bt_addr):
+        """Add to the list of mappings."""
+        if isinstance(packet, EddystoneUIDFrame):
+            # remove out old mapping
+            new_mappings = [m for m in self.eddystone_mappings if m[0] != bt_addr]
+            new_mappings.append((bt_addr, packet.properties))
+            self.eddystone_mappings = new_mappings
+
+    def get_properties(self, packet, bt_addr):
+        """Get properties of beacon depending on type."""
+        if is_one_of(packet, [EddystoneTLMFrame, EddystoneURLFrame, \
+                              EddystoneEncryptedTLMFrame, EddystoneEIDFrame]):
+            # here we retrieve the namespace and instance which corresponds to the
+            # eddystone beacon with this bt address
+            return self.properties_from_mapping(bt_addr)
+        else:
+            return packet.properties
+
+    def properties_from_mapping(self, bt_addr):
+        """Retrieve properties (namespace, instance) for the specified bt address."""
+        for addr, properties in self.eddystone_mappings:
+            if addr == bt_addr:
+                return properties
+        return None
+
+    def terminate(self):
+        """Signal runner to stop and join thread."""
+        self.toggle_scan(False)
+        self.keep_going = False
+        self.join()
 
 
 class BeaconScanner(object):
