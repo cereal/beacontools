@@ -2,6 +2,8 @@
 from .packet import BasePacket
 from ..utils import data_to_uuid
 
+__all__ = ['IBeaconAdvertisement']
+
 
 class IBeaconAdvertisement(BasePacket):
     """iBeacon advertisement."""
