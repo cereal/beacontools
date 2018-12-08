@@ -2,6 +2,8 @@
 from .packet import BasePacket
 from ..utils import data_to_hexstring
 
+__all__ = ['EstimoteTelemetryFrameA', 'EstimoteTelemetryFrameB']
+
 
 class EstimoteTelemetryFrameA(BasePacket):
     """Estimote telemetry subframe A."""
