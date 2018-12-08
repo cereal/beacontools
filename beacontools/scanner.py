@@ -111,14 +111,14 @@ class Scanner(threading.Thread):
                 "Invalid window given {}, must be in range of 2.5ms to 10240ms!".format(
                     window_fractions))
 
-        scan_parameter_pkg = struct.pack(
-            ">BHHBB",
-            scan_type,
-            interval_fractions,
-            window_fractions,
-            mac_type,
-            filter_type)
         if not self._resouceless.is_set():
+            scan_parameter_pkg = struct.pack(
+                ">BHHBB",
+                scan_type,
+                interval_fractions,
+                window_fractions,
+                mac_type,
+                filter_type)
             self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                      scan_parameter_pkg)
             return
@@ -129,8 +129,9 @@ class Scanner(threading.Thread):
             enable            - boolean value to enable/disable scanner
             filter_duplicates - boolean value to enable/disable filter, that
                                 omits duplicated packets"""
-        command = struct.pack(">BB", enable, filter_duplicates)
-        self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
+        if not self._resouceless.is_set():
+            command = struct.pack(">BB", enable, filter_duplicates)
+            self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
 
 
 class BeaconScanner(object):
