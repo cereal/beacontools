@@ -2,4 +2,5 @@
 
 
 class BasePacket(object):
+    """Valid Packets MUST inherit from BasePacket"""
     pass
