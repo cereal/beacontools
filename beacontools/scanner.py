@@ -141,6 +141,12 @@ class Scanner(threading.Thread):
             return
         raise RuntimeError("Couldn't send hci command, seems we are resourceless")
 
+    def _one_of_packet_filter(self, packet):
+        """matches the packet one of our packet filters?"""
+        return any(map(
+            lambda x: isinstance(*x),
+            zip(itertools.cycle(packet), self._packet_filter)))
+
     def process_packet(self, pkt):
         """Parse the packet and call callback if one of the filters matches."""
 
@@ -175,24 +181,21 @@ class Scanner(threading.Thread):
         elif self._device_filter is None:
             # filter by packet type
             # if is_one_of(packet, self.packet_filter):
-            if any(map(lambda x: isinstance(*x),
-                       zip(itertools.cycle(packet),
-                       self._packet_filter))):
+            if self._one_of_packet_filters(packet):
                 self.callback(bt_addr, rssi, packet, properties)
         else:
             # filter by device and packet type
-            if self.packet_filter and not is_one_of(packet, self.packet_filter):
+            if self._packet_filter and not self._one_of_packet_filters(packet):
                 # return if packet filter does not match
                 return
 
             # iterate over filters and call .matches() on each
-            for filtr in self.device_filter:
-                if isinstance(filtr, BtAddrFilter):
-                    if filtr.matches({'bt_addr':bt_addr}):
+            for fltr in self._device_filter:
+                if isinstance(fltr, BtAddrFilter):
+                    if fltr.matches({'bt_addr': bt_addr}):
                         self.callback(bt_addr, rssi, packet, properties)
                         return
-
-                elif filtr.matches(properties):
+                elif fltr.matches(properties):
                     self.callback(bt_addr, rssi, packet, properties)
                     return
 
