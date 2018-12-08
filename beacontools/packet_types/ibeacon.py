@@ -1,7 +1,9 @@
 """Packet classes for iBeacon beacons."""
+from .packet import BasePacket
 from ..utils import data_to_uuid
 
-class IBeaconAdvertisement(object):
+
+class IBeaconAdvertisement(BasePacket):
     """iBeacon advertisement."""
 
     def __init__(self, data):
