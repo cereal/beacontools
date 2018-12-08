@@ -11,18 +11,14 @@ except AttributeError:  # python3
     pass
 from importlib import import_module
 
-from .parser import parse_packet
-from .utils import bt_addr_to_string
-from .packet_types import BasePacket
-from .packet_types import (EddystoneUIDFrame, EddystoneURLFrame,
-                           EddystoneEncryptedTLMFrame, EddystoneTLMFrame,
-                           EddystoneEIDFrame,)
-from .device_filters import BtAddrFilter, DeviceFilter
-from .utils import is_packet_type, is_one_of, to_int, bin_to_int, get_mode
 from .const import (ScannerMode, ScanType, ScanFilter, BluetoothAddressType,
                     LE_META_EVENT, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE,
                     OCF_LE_SET_SCAN_PARAMETERS, EVT_LE_ADVERTISING_REPORT,
                     MS_FRACTION_DIVIDER,)
+from .packet_types import (EddystoneUIDFrame, EddystoneURLFrame, EddystoneEIDFrame,
+                           EddystoneEncryptedTLMFrame, EddystoneTLMFrame,)
+from .device_filters import BtAddrFilter, DeviceFilter
+from .utils import to_int, bin_to_int, get_mode
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,6 +44,7 @@ class Scanner(threading.Thread):
             self._cb = callback
         else:
             raise ValueError("callback is not a callable object!")
+        from .packet_types import BasePacket
         super(Scanner, self).__init__()
         self._bt_device_id = bt_device_id
         self._device_filter = Scanner.validate_filters(device_filter, DeviceFilter)
@@ -77,7 +74,7 @@ class Scanner(threading.Thread):
             self.toggle_scan(True)
 
             while self._consuming.is_set():
-                pkt = self.socket.recv(255)
+                pkt = self._socket.recv(255)
                 event = to_int(pkt[1])
                 subevent = to_int(pkt[3])
                 if event == LE_META_EVENT and subevent == EVT_LE_ADVERTISING_REPORT:
@@ -117,7 +114,7 @@ class Scanner(threading.Thread):
                 "Invalid window given {}, must be in range of 2.5ms to 10240ms!".format(
                     window_fractions))
 
-        if not self._resouceless.is_set():
+        if not self._resourceless.is_set():
             scan_parameter_pkg = struct.pack(
                 ">BHHBB",
                 scan_type,
@@ -135,7 +132,7 @@ class Scanner(threading.Thread):
             enable            - boolean value to enable/disable scanner
             filter_duplicates - boolean value to enable/disable filter, that
                                 omits duplicated packets"""
-        if not self._resouceless.is_set():
+        if not self._resourceless.is_set():
             command = struct.pack(">BB", enable, filter_duplicates)
             self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
             return
@@ -153,6 +150,8 @@ class Scanner(threading.Thread):
         """Parse the packet and call callback if one of the filters matches."""
         # check if this could be a valid packet before parsing
         # this reduces the CPU load significantly
+        from .parser import parse_packet
+        from .utils import bt_addr_to_string
         if not (
                 ((self._mode & ScannerMode.MODE_IBEACON) and (pkt[19:23] == b"\x4c\x00\x02\x15")) or
                 ((self._mode & ScannerMode.MODE_EDDYSTONE) and (pkt[19:21] == b"\xaa\xfe")) or
@@ -225,3 +224,12 @@ class Scanner(threading.Thread):
             if addr == bt_addr:
                 return properties
         return None
+
+
+if __name__ == '__main__':
+    def cb(a, b, c, d):
+        print a, b, c, d
+    scnr = Scanner(cb)
+    scnr.start()
+    raw_input(">")
+    scnr.stop(True)
