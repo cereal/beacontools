@@ -2,7 +2,7 @@
 from construct import Struct, BitStruct, Flag, BitsInteger, Byte, Const, Int8sl, Array, Int16ub
 from ..const import IBEACON_COMPANY_ID, IBEACON_PROXIMITY_TYPE
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,cyclic-import
 
 IBeaconAdvertisingPacket = Struct(
     Const(b"\x02\x01"),  # Length 0x02 Type: 0x01 (Advertising Flags)
