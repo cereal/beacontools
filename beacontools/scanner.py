@@ -124,6 +124,14 @@ class Scanner(threading.Thread):
             return
         raise RuntimeError("Couldn't send hci command, seems we are resourceless")
 
+    def toggle_scan(self, enable, filter_duplicates=False):
+        """ Enable and disable BLE scanning.
+            enable            - boolean value to enable/disable scanner
+            filter_duplicates - boolean value to enable/disable filter, that
+                                omits duplicated packets"""
+        command = struct.pack(">BB", enable, filter_duplicates)
+        self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
+
 
 class BeaconScanner(object):
     """Scan for Beacon advertisements."""
