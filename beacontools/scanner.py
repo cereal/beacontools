@@ -82,7 +82,7 @@ class Scanner(threading.Thread):
                     self.process_packet(pkt)
             self.toggle_scan(False)
             self._socket = None
-            self._resourceless.set()
+        self._resourceless.set()
 
     def stop(self, blocking=False):
         self._consuming.clear()
