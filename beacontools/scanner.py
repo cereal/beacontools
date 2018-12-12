@@ -113,8 +113,10 @@ class Monitor(threading.Thread):
 
         Args:
             scan_type: ScanType.(PASSIVE|ACTIVE)
-            interval: ms between scans (valid range 2.5ms - 10240ms) **note**: when interval and window are equal, the scan runs continuos
-            window: ms scan duration (valid range 2.5ms - 10240ms)
+            interval: ms (as float) between scans (valid range 2.5ms - 10240ms)
+                **note**: when interval and window are equal, the scan
+                runs continuos
+            window: ms (as float) scan duration (valid range 2.5ms - 10240ms)
             address_type: Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
                 * PUBLIC = use device MAC address
                 * RANDOM = generate a random MAC address and use that
@@ -149,10 +151,12 @@ class Monitor(threading.Thread):
                                 scan_parameter_pkg)
 
     def toggle_scan(self, enable, filter_duplicates=False):
-        """ Enable and disable BLE scanning.
-            enable            - boolean value to enable/disable scanner
-            filter_duplicates - boolean value to enable/disable filter, that
-                                omits duplicated packets"""
+        """Enables or disables BLE scanning
+
+        Args:
+            enable: boolean value to enable (True) or disable (False) scanner
+            filter_duplicates: boolean value to enable/disable filter, that
+                omits duplicated packets"""
         command = struct.pack(">BB", enable, filter_duplicates)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
 
