@@ -90,53 +90,60 @@ class Scanner(threading.Thread):
             self._resourceless.wait()
 
     def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_ms=10, window_ms=10,
-                            mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
+                            address_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the le scan parameters
-            type     - ScanType.(PASSIVE|ACTIVE)
-            interval - ms between scans (valid range 2.5ms - 10240ms)
-                  !note: when interval and window are equal, the scan runs continuos
-            window   - ms scan duration (valid range 2.5ms - 10240ms)
-            own_type - Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
-                       PUBLIC = use device Bluetooth MAC address
-                       RANDOM = generate and use a random MAC address
-            filter   - ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
-                       return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
-                       because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
+
+        Args:
+            scan_type: ScanType.(PASSIVE|ACTIVE)
+            interval: ms (as float) between scans (valid range 2.5ms - 10240ms)
+                **note**: when interval and window are equal, the scan
+                runs continuos
+            window: ms (as float) scan duration (valid range 2.5ms - 10240ms)
+            address_type: Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
+                * PUBLIC = use device MAC address
+                * RANDOM = generate a random MAC address and use that
+            filter: ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
+                return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
+                because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)
+
+        Raises:
+            ValueError: A value had an unexpected format or was not in range
+        """
         interval_fractions = interval_ms / MS_FRACTION_DIVIDER
         if interval_fractions < 0x0004 or interval_fractions > 0x4000:
             raise ValueError(
                 "Invalid interval given {}, must be in range of 2.5ms to 10240ms!".format(
                     interval_fractions))
-
         window_fractions = window_ms / MS_FRACTION_DIVIDER
         if window_fractions < 0x0004 or window_fractions > 0x4000:
             raise ValueError(
                 "Invalid window given {}, must be in range of 2.5ms to 10240ms!".format(
                     window_fractions))
 
-        if not self._resourceless.is_set():
-            scan_parameter_pkg = struct.pack(
-                ">BHHBB",
-                scan_type,
-                interval_fractions,
-                window_fractions,
-                mac_type,
-                filter_type)
-            self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
-                                     scan_parameter_pkg)
-            return
-        raise RuntimeError("Couldn't send hci command, seems we are resourceless")
+        interval_fractions, window_fractions = int(interval_fractions), int(window_fractions)
+        if self._resourceless.is_set():
+            raise RuntimeError("Couldn't send hci command, seems we are resourceless")
+        scan_parameter_pkg = struct.pack(
+            ">BHHBB",
+            scan_type,
+            interval_fractions,
+            window_fractions,
+            address_type,
+            filter_type)
+        self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
+                                 scan_parameter_pkg)
 
     def toggle_scan(self, enable, filter_duplicates=False):
-        """ Enable and disable BLE scanning.
-            enable            - boolean value to enable/disable scanner
-            filter_duplicates - boolean value to enable/disable filter, that
-                                omits duplicated packets"""
-        if not self._resourceless.is_set():
-            command = struct.pack(">BB", enable, filter_duplicates)
-            self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
-            return
-        raise RuntimeError("Couldn't send hci command, seems we are resourceless")
+        """Enables or disables BLE scanning
+
+        Args:
+            enable: boolean value to enable (True) or disable (False) scanner
+            filter_duplicates: boolean value to enable/disable filter, that
+                omits duplicated packets"""
+        if self._resourceless.is_set():
+            raise RuntimeError("Couldn't send hci command, seems we are resourceless")
+        command = struct.pack(">BB", enable, filter_duplicates)
+        self._btlib.hci_send_cmd(self._socket, OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, command)
 
     def _one_of_packet_filter(self, packet, fltrs=None):
         """matches the packet one of our packet filters?"""
@@ -224,12 +231,3 @@ class Scanner(threading.Thread):
             if addr == bt_addr:
                 return properties
         return None
-
-
-if __name__ == '__main__':
-    def cb(a, b, c, d):
-        print a, b, c, d
-    scnr = Scanner(cb)
-    scnr.start()
-    raw_input(">")
-    scnr.stop(True)
