@@ -108,18 +108,23 @@ class Monitor(threading.Thread):
         self.socket.close()
 
     def set_scan_parameters(self, scan_type=ScanType.ACTIVE, interval_ms=10, window_ms=10,
-                            mac_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
+                            address_type=BluetoothAddressType.RANDOM, filter_type=ScanFilter.ALL):
         """"sets the le scan parameters
-            type     - ScanType.(PASSIVE|ACTIVE)
-            interval - ms between scans (valid range 2.5ms - 10240ms)
-                  !note: when interval and window are equal, the scan runs continuos
-            window   - ms scan duration (valid range 2.5ms - 10240ms)
-            own_type - Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
-                       PUBLIC = use device Bluetooth MAC address
-                       RANDOM = generate and use a random MAC address
-            filter   - ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
-                       return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
-                       because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
+            type
+                ScanType.(PASSIVE|ACTIVE)
+            interval
+                ms between scans (valid range 2.5ms - 10240ms)
+                !note: when interval and window are equal, the scan runs continuos
+            window
+                ms scan duration (valid range 2.5ms - 10240ms)
+            address_type
+                Bluetooth address type BluetoothAddressType.(PUBLIC|RANDOM)
+                    PUBLIC = use device Bluetooth MAC address
+                    RANDOM = generate and use a random MAC address
+            filter
+                ScanFilter.(ALL|WHITELIST_ONLY) only ALL is supported, which will
+                return all fetched bluetooth packets (WHITELIST_ONLY is not supported,
+                because OCF_LE_ADD_DEVICE_TO_WHITE_LIST command is not implemented)"""
         interval_fractions = interval_ms / MS_FRACTION_DIVIDER
         if interval_fractions < 0x0004 or interval_fractions > 0x4000:
             raise ValueError(
@@ -138,7 +143,7 @@ class Monitor(threading.Thread):
             scan_type,
             interval_fractions,
             window_fractions,
-            mac_type,
+            address_type,
             filter_type)
         self.bluez.hci_send_cmd(self.socket, OGF_LE_CTL, OCF_LE_SET_SCAN_PARAMETERS,
                                 scan_parameter_pkg)
