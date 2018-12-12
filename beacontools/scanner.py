@@ -131,12 +131,7 @@ class Monitor(threading.Thread):
                 "Invalid window given {}, must be in range of 2.5ms to 10240ms!".format(
                     window_fractions))
 
-        if interval_fractions.is_integer() and window_fractions.is_integer():
-            interval_fractions, window_fractions = int(interval_fractions), int(window_fractions)
-        else:
-            raise ValueError(
-                "Unexpected float in interval_fractions/window_fractions '{}'".format(
-                    interval_fractions, window_fractions))
+        interval_fractions, window_fractions = int(interval_fractions), int(window_fractions)
 
         scan_parameter_pkg = struct.pack(
             ">BHHBB",
